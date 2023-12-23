@@ -1,20 +1,19 @@
-import asyncio
-import io
-import os
-import sys
-
-import nest_asyncio
 import streamlit as st
-from docx import Document
 from langchain.chains import RetrievalQA
+import os
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.prompts import PromptTemplate
 from langchain.chat_models import ChatOpenAI
 from langchain.document_loaders import TextLoader
 from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.prompts import PromptTemplate
-from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import Chroma
+from docx import Document
+import asyncio
+import nest_asyncio
+import io
 from openai.error import APIError
-
+import pysqlite3
+import sys
 nest_asyncio.apply()
 
 
