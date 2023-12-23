@@ -426,7 +426,7 @@ def generate_response(uploaded_file, employees_info, project_name, num_employees
             persist_directory=persist_directory
         )  # создаем БД
 
-        vectordb.persist()  # сохраним БД *test git add 1
+        vectordb.persist()  # сохраним БД *test git add 2
         vectordb = Chroma(
             persist_directory=persist_directory,
             embedding_function=embedding
