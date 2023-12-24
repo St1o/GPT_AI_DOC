@@ -377,7 +377,7 @@ def generate_response(uploaded_file, employees_info, project_name, num_employees
             doc.add_heading(question, level=1)
             doc.add_paragraph(result)
 
-        for question, result in zip(titles[10:35], results_second_part):
+        for question, result in zip(titles[10:18], results_second_part):
             doc.add_heading(question, level=1)
             doc.add_paragraph(result)
 
