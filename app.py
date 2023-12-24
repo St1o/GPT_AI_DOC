@@ -451,8 +451,11 @@ def generate_response(uploaded_file, employees_info, project_name, num_employees
         )
         vectordb.persist()
 
-        tasks = [loop.create_task(async_run(qa_chain, question)) for question in questions[9:]]
+        tasks = [loop.create_task(async_run(qa_chain, question)) for question in questions[9:17]]
         results_second_part = loop.run_until_complete(asyncio.gather(*tasks))
+
+        tasks = [loop.create_task(async_run(qa_chain, question)) for question in questions[17:]]
+        results_third_part = loop.run_until_complete(asyncio.gather(*tasks))
 
         doc = Document()
 
@@ -460,7 +463,11 @@ def generate_response(uploaded_file, employees_info, project_name, num_employees
             doc.add_heading(question, level=1)
             doc.add_paragraph(result)
 
-        for question, result in zip(titles[9:], results_second_part):
+        for question, result in zip(titles[9:17], results_second_part):
+            doc.add_heading(question, level=1)
+            doc.add_paragraph(result)
+
+        for question, result in zip(titles[17:], results_third_part):
             doc.add_heading(question, level=1)
             doc.add_paragraph(result)
 
