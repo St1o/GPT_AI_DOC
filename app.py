@@ -495,17 +495,14 @@ def generate_response(uploaded_file, employees_info, project_name, num_employees
         )
         vectordb.persist()
 
-        tasks = [loop.create_task(async_run(qa_chain, question)) for question in questions[9:17]]
+        tasks = [loop.create_task(async_run(qa_chain, question)) for question in questions[9:18]]
         results_second_part = loop.run_until_complete(asyncio.gather(*tasks))
 
-        tasks = [loop.create_task(async_run(qa_chain, question)) for question in questions[17:25]]
+        tasks = [loop.create_task(async_run(qa_chain, question)) for question in questions[18:27]]
         results_third_part = loop.run_until_complete(asyncio.gather(*tasks))
 
-        tasks = [loop.create_task(async_run(qa_chain, question)) for question in questions[25:33]]
+        tasks = [loop.create_task(async_run(qa_chain, question)) for question in questions[27:]]
         results_fourth_part = loop.run_until_complete(asyncio.gather(*tasks))
-
-        tasks = [loop.create_task(async_run(qa_chain, question)) for question in questions[33:]]
-        results_fifth_part = loop.run_until_complete(asyncio.gather(*tasks))
 
         doc = Document()
 
@@ -513,19 +510,15 @@ def generate_response(uploaded_file, employees_info, project_name, num_employees
             doc.add_heading(question, level=1)
             doc.add_paragraph(result)
 
-        for question, result in zip(titles[9:17], results_second_part):
+        for question, result in zip(titles[9:18], results_second_part):
             doc.add_heading(question, level=1)
             doc.add_paragraph(result)
 
-        for question, result in zip(titles[17:25], results_third_part):
+        for question, result in zip(titles[18:27], results_third_part):
             doc.add_heading(question, level=1)
             doc.add_paragraph(result)
 
-        for question, result in zip(titles[25:33], results_fourth_part):
-            doc.add_heading(question, level=1)
-            doc.add_paragraph(result)
-
-        for question, result in zip(titles[33:], results_fifth_part):
+        for question, result in zip(titles[27:], results_fourth_part):
             doc.add_heading(question, level=1)
             doc.add_paragraph(result)
 
