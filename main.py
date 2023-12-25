@@ -595,7 +595,7 @@ with st.form('myform', clear_on_submit=False):
 if st.session_state.get('form_processed'):
     with io.BytesIO() as temp_file:
         response.save(temp_file)
-        st.text(response)
+        st.write(response)
         temp_file.seek(0)
 
 
