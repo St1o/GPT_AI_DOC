@@ -1,19 +1,21 @@
-import streamlit as st
-from langchain.chains import RetrievalQA
 import os
+import sys
+import time
+import asyncio
+import io
+import streamlit as st
+import pysqlite3
+import nest_asyncio
+from docx import Document
+from openai.error import APIError
+from langchain.chains import RetrievalQA
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.prompts import PromptTemplate
 from langchain.chat_models import ChatOpenAI
 from langchain.document_loaders import TextLoader
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.vectorstores import Chroma
-from docx import Document
-import asyncio
-import nest_asyncio
-import io
-from openai.error import APIError
-import pysqlite3
-import sys
+
 nest_asyncio.apply()
 
 
@@ -43,7 +45,7 @@ Question: {question}
 Useful answers:"""
 
 os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
-#os.environ["OPENAI_API_KEY"] = "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"
+
 response = Document()
 
 def docx_bytesio_to_md(input_bytesio):
@@ -476,30 +478,32 @@ def generate_response(uploaded_file, employees_info, project_name, num_employees
                   "Уровни TRL (УГТ) - ближайшие 3 года", "Выполнение работ по уточнению параметров продукции - ближайшие 3 года",
                   "Организация производства продукции", "Реализация продукции", "Календарный план"]
 
-        tasks = [loop.create_task(async_run(qa_chain, question)) for question in questions[:18]]
-        results = loop.run_until_complete(asyncio.gather(*tasks))
-
-        docs = [MyDocument(result) for result in results]
-        splitted_texts = splitter.split_documents(docs)
-        vectordb = Chroma.from_documents(
-            documents=splitted_texts,
-            embedding=embedding,
-            persist_directory=persist_directory
-        )
-        vectordb.persist()
-
-        tasks = [loop.create_task(async_run(qa_chain, question)) for question in questions[:18]]
-        results_second_part = loop.run_until_complete(asyncio.gather(*tasks))
+        # Создаем 4 списка вопросов
+        questions_parts = [questions[i * 9:(i + 1) * 9] for i in range(4)]
+        titles_parts = [titles[i * 9:(i + 1) * 9] for i in range(4)]
 
         doc = Document()
 
-        for question, result in zip(titles[0:18], results):
-            doc.add_heading(question, level=1)
-            doc.add_paragraph(result)
+        for i, (questions_part, titles_part) in enumerate(zip(questions_parts, titles_parts)):
+            tasks = [loop.create_task(async_run(qa_chain, question)) for question in questions_part]
+            results_part = loop.run_until_complete(asyncio.gather(*tasks))
 
-        for question, result in zip(titles[18:], results_second_part):
-            doc.add_heading(question, level=1)
-            doc.add_paragraph(result)
+            # Загружаем в базу данных только результаты первых 18 вопросов
+            if i < 2:
+                docs = [MyDocument(result) for result in results_part]
+                splitted_texts = splitter.split_documents(docs)
+                vectordb = Chroma.from_documents(
+                    documents=splitted_texts,
+                    embedding=embedding,
+                    persist_directory=persist_directory
+                )
+                vectordb.persist()
+
+            for question, result in zip(titles_part, results_part):
+                doc.add_heading(question, level=1)
+                doc.add_paragraph(result)
+
+            time.sleep(60)
 
         return doc
 
